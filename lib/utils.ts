@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-const WHATSAPP_NUMBER = '918015199599'
+const WHATSAPP_NUMBER = '918148212664'
 
 export function whatsappLink(message?: string): string {
   const text = message ?? "Hi, I'd like to enquire about dresses at Celebrations."
@@ -44,8 +44,8 @@ export const STORE_INFO = {
   city: 'Coimbatore',
   state: 'Tamil Nadu',
   pincode: '641009',
-  phone: '+91 80151 99599',
-  phoneLink: 'tel:+918015199599',
+  phone: '+91 81482 12664',
+  phoneLink: 'tel:+918148212664',
   rating: 4.6,
   reviewCount: 1345,
   mapsLink: 'https://maps.google.com/?q=Celebrations,+Cross+Cut+Rd,+Gandhipuram,+Coimbatore',

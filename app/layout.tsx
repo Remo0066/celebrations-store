@@ -50,7 +50,7 @@ const jsonLd = {
     postalCode: '641009',
     addressCountry: 'IN',
   },
-  telephone: '+918015199599',
+  telephone: '+918148212664',
   aggregateRating: {
     '@type': 'AggregateRating',
     ratingValue: '4.6',
