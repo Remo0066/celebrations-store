@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, MessageCircle } from 'lucide-react'
+import { Menu, X, MessageCircle, Heart, Trash2 } from 'lucide-react'
 import { cn, whatsappLink } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useWishlist } from '@/hooks/use-wishlist'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import Image from 'next/image'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -21,6 +30,16 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
+  const { items, removeItem, isHydrated } = useWishlist()
+
+  const generateWhatsAppMessage = () => {
+    let message = 'Hi Celebrations team! 👋\n\nI am interested in the following items from my Wishlist:\n'
+    items.forEach((item, i) => {
+      message += `\n${i + 1}. *${item.title}*${item.priceRange ? ` (${item.priceRange})` : ''}`
+    })
+    message += '\n\nCould you please let me know about their availability and details?'
+    return encodeURIComponent(message)
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,6 +86,67 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          
+          {/* Wishlist Trigger */}
+          {isHydrated && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="relative flex items-center gap-2 text-sm font-medium text-[var(--deep-mahogany)] transition-colors hover:text-[var(--celebration-gold)]">
+                  <Heart className="h-5 w-5" />
+                  {items.length > 0 && (
+                    <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--celebration-gold)] text-[10px] text-white">
+                      {items.length}
+                    </span>
+                  )}
+                  Wishlist
+                </button>
+              </SheetTrigger>
+              <SheetContent className="flex w-full flex-col sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle>Your Wishlist</SheetTitle>
+                </SheetHeader>
+                <div className="mt-8 flex-1 overflow-y-auto pr-4">
+                  {items.length === 0 ? (
+                    <div className="flex h-full flex-col items-center justify-center text-center text-gray-500">
+                      <Heart className="mb-4 h-12 w-12 text-gray-300" />
+                      <p>Your wishlist is empty.</p>
+                      <p className="mt-2 text-sm">Browse our collections to add some.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-6">
+                      {items.map((item) => (
+                        <div key={`${item.source}-${item.id}`} className="flex items-center gap-4">
+                          <div className="relative h-20 w-16 overflow-hidden rounded-md">
+                            <Image src={item.image} alt={item.title} fill className="object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-[var(--deep-mahogany)]">{item.title}</h4>
+                            {item.priceRange && <p className="text-sm text-gray-500">{item.priceRange}</p>}
+                          </div>
+                          <button
+                            onClick={() => removeItem(item.id, item.source)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {items.length > 0 && (
+                  <div className="mt-6 border-t pt-6">
+                    <Button asChild className="w-full bg-[var(--celebration-gold)] text-white hover:bg-[var(--rich-chestnut)]">
+                      <a href={whatsappLink(generateWhatsAppMessage())} target="_blank" rel="noopener noreferrer">
+                        <MessageCircle className="mr-2 h-5 w-5" />
+                        Send Wishlist to WhatsApp
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
 
         {/* Desktop WhatsApp Button */}
@@ -138,7 +218,62 @@ export function Navbar() {
                 ))}
               </nav>
 
-              <div className="mt-auto">
+              <div className="mt-auto flex flex-col gap-4">
+                {isHydrated && (
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="w-full border-[var(--celebration-gold)] text-[var(--celebration-gold)]">
+                        <Heart className="mr-2 h-5 w-5" />
+                        View Wishlist ({items.length})
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="flex w-full flex-col sm:max-w-md">
+                      <SheetHeader>
+                        <SheetTitle>Your Wishlist</SheetTitle>
+                      </SheetHeader>
+                      <div className="mt-8 flex-1 overflow-y-auto pr-4">
+                        {items.length === 0 ? (
+                          <div className="flex h-full flex-col items-center justify-center text-center text-gray-500">
+                            <Heart className="mb-4 h-12 w-12 text-gray-300" />
+                            <p>Your wishlist is empty.</p>
+                            <p className="mt-2 text-sm">Browse our collections to add some.</p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-6">
+                            {items.map((item) => (
+                              <div key={`${item.source}-${item.id}`} className="flex items-center gap-4">
+                                <div className="relative h-20 w-16 overflow-hidden rounded-md">
+                                  <Image src={item.image} alt={item.title} fill className="object-cover" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-[var(--deep-mahogany)]">{item.title}</h4>
+                                  {item.priceRange && <p className="text-sm text-gray-500">{item.priceRange}</p>}
+                                </div>
+                                <button
+                                  onClick={() => removeItem(item.id, item.source)}
+                                  className="text-gray-400 hover:text-red-500"
+                                >
+                                  <Trash2 className="h-5 w-5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {items.length > 0 && (
+                        <div className="mt-6 border-t pt-6">
+                          <Button asChild className="w-full bg-[var(--celebration-gold)] text-white hover:bg-[var(--rich-chestnut)]">
+                            <a href={whatsappLink(generateWhatsAppMessage())} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="mr-2 h-5 w-5" />
+                              Send Wishlist to WhatsApp
+                            </a>
+                          </Button>
+                        </div>
+                      )}
+                    </SheetContent>
+                  </Sheet>
+                )}
+                
                 <Button
                   asChild
                   className="w-full bg-[var(--celebration-gold)] text-white hover:bg-[var(--rich-chestnut)]"

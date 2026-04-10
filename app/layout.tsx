@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { WhatsAppFAB } from '@/components/layout/whatsapp-fab'
+import { WishlistProvider } from '@/hooks/use-wishlist'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -72,10 +73,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <WhatsAppFAB />
+        <WishlistProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+          <WhatsAppFAB />
+        </WishlistProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

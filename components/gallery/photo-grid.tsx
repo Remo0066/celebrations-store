@@ -3,14 +3,16 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, MapPin, Heart } from 'lucide-react'
 import { galleryImages, galleryCategories, type GalleryImage } from '@/lib/data/gallery'
 import { cn, STORE_INFO } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useWishlist } from '@/hooks/use-wishlist'
 
 export function PhotoGrid() {
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
+  const { addItem, removeItem, isInWishlist } = useWishlist()
 
   const filteredImages = activeCategory === 'all'
     ? galleryImages
@@ -65,28 +67,49 @@ export function PhotoGrid() {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 className="mb-4 break-inside-avoid"
               >
-                <button
-                  onClick={() => setSelectedImage(image)}
-                  className="group relative block w-full overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--celebration-gold)] focus:ring-offset-2"
-                >
-                  <div
-                    className={cn(
-                      'relative w-full',
-                      image.aspectRatio === 'portrait' && 'aspect-[3/4]',
-                      image.aspectRatio === 'landscape' && 'aspect-[4/3]',
-                      image.aspectRatio === 'square' && 'aspect-square'
-                    )}
+                <div className="group relative block w-full overflow-hidden rounded-xl">
+                  <button
+                    onClick={() => setSelectedImage(image)}
+                    className="block w-full focus:outline-none focus:ring-2 focus:ring-[var(--celebration-gold)] focus:ring-offset-2"
                   >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-[var(--deep-mahogany)]/0 transition-colors group-hover:bg-[var(--deep-mahogany)]/20" />
-                  </div>
-                </button>
+                    <div
+                      className={cn(
+                        'relative w-full',
+                        image.aspectRatio === 'portrait' && 'aspect-[3/4]',
+                        image.aspectRatio === 'landscape' && 'aspect-[4/3]',
+                        image.aspectRatio === 'square' && 'aspect-square'
+                      )}
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-[var(--deep-mahogany)]/0 transition-colors group-hover:bg-[var(--deep-mahogany)]/20" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      if (isInWishlist(image.id, 'gallery')) {
+                        removeItem(image.id, 'gallery');
+                      } else {
+                        addItem({
+                          id: image.id,
+                          title: image.alt || `Gallery Image ${image.id}`,
+                          image: image.src,
+                          source: 'gallery'
+                        });
+                      }
+                    }}
+                    className="absolute right-4 top-4 z-10 hidden h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[var(--celebration-gold)] shadow-sm backdrop-blur-sm transition-transform hover:scale-110 hover:bg-white flex"
+                    aria-label={isInWishlist(image.id, 'gallery') ? "Remove from wishlist" : "Add to wishlist"}
+                  >
+                    <Heart className={cn("h-5 w-5", isInWishlist(image.id, 'gallery') && "fill-current")} />
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>

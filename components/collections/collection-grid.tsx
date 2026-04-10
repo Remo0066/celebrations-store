@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { collections, categories, type Collection } from '@/lib/data/collections'
 import { whatsappLink, cn } from '@/lib/utils'
+import { useWishlist } from '@/hooks/use-wishlist'
 
 export function CollectionGrid() {
   const [activeCategory, setActiveCategory] = useState<string>('all')
@@ -54,15 +55,42 @@ export function CollectionGrid() {
 }
 
 function CollectionCard({ collection, index }: { collection: Collection; index: number }) {
+  const { items, addItem, removeItem, isInWishlist } = useWishlist()
+  
+  const inWishlist = isInWishlist(collection.id, 'collection')
+
+  const toggleWishlist = () => {
+    if (inWishlist) {
+      removeItem(collection.id, 'collection')
+    } else {
+      addItem({
+        id: collection.id,
+        title: collection.title,
+        image: collection.image,
+        priceRange: collection.priceRange,
+        source: 'collection',
+      })
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group"
+      className="group relative"
     >
       <div className="overflow-hidden rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
+        {/* Wishlist Button */}
+        <button
+          onClick={toggleWishlist}
+          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[var(--celebration-gold)] shadow-sm backdrop-blur-sm transition-transform hover:scale-110 hover:bg-white"
+          aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart className={cn("h-5 w-5", inWishlist && "fill-current")} />
+        </button>
+
         {/* Image */}
         <div className="relative aspect-[4/5] overflow-hidden">
           <Image
